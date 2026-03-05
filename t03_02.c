@@ -1,67 +1,63 @@
 // Ignacia Manurung - 12S25034
 
-#include <stdio.h> // Digunakan untuk input/output seperti printf dan scanf
-#include <stdlib.h> // Digunakan untuk EXIT_SUCCESS dan fungsi utilitas lainnya
-#include <string.h> // Disertakan sesuai permintaan, meskipun tidak digunakan secara langsung untuk operasi ini
-#include <limits.h> // Digunakan untuk INT_MAX dan INT_MIN
+#include <stdio.h>  // Diperlukan untuk fungsi input/output seperti printf dan scanf
+#include <stdlib.h> // Diperlukan untuk fungsi umum, contohnya exit() atau malloc(), meskipun di sini tidak eksplisit digunakan.
+#include <string.h> // Diperlukan untuk manipulasi string, meskipun tidak digunakan secara langsung dalam kasus ini, disertakan sesuai permintaan.
 
+// Fungsi utama program. Sesuai permintaan, semua logika akan berada dalam satu fungsi.
 int main() {
-    int n; // Jumlah nilai tugas mahasiswa
-    int nilai_mahasiswa[100]; // Array untuk menyimpan nilai, diasumsikan max 100 mahasiswa
-    long int sum = 0; // Total seluruh nilai (menggunakan long int untuk menghindari overflow jika n dan nilai besar)
-    double rata_rata; // Nilai rata-rata
-    int count_diatas_rata = 0; // Banyaknya mahasiswa dengan nilai >= rata-rata
-    int min_val = INT_MAX; // Nilai minimum, diinisialisasi dengan nilai int maksimum
-    int max_val = INT_MIN; // Nilai maksimum, diinisialisasi dengan nilai int minimum
-    
-    // --- Input 'n' ---
-    printf("Masukkan jumlah mahasiswa (n, maks 100): ");
-    if (scanf("%d", &n) != 1 || n <= 0 || n > 100) {
-        printf("Masukan tidak valid untuk n. n harus bilangan positif antara 1 dan 100.\n");
-        return EXIT_FAILURE; // Keluar dengan status error
+    int n; // Variabel 'n' untuk menyimpan jumlah nilai yang akan dimasukkan.
+    int i; // Variabel 'i' sebagai indeks untuk loop.
+    int sum = 0; // Variabel untuk menyimpan total/jumlah seluruh nilai. Diinisialisasi dengan 0.
+    double average; // Variabel untuk menyimpan nilai rata-rata. Menggunakan 'double' untuk presisi desimal.
+    int count_above_average = 0; // Variabel untuk menghitung banyaknya nilai di atas atau sama dengan rata-rata. Diinisialisasi dengan 0.
+
+    // 1. Membaca nilai 'n' dari input.
+    // 'n' adalah baris pertama masukan, yang menunjukkan jumlah nilai berikutnya.
+    if (scanf("%d", &n) != 1 || n <= 0) {
+        fprintf(stderr, "Masukan tidak valid untuk N. N harus bilangan positif.\n");
+        return 1; // Keluar dengan kode error
     }
 
-    // --- Input Nilai Tugas Mahasiswa ---
-    printf("Masukkan %d nilai tugas mahasiswa (0-100):\n", n);
-    for (int i = 0; i < n; i++) {
-        int current_nilai;
-        printf("Nilai mahasiswa ke-%d: ", i + 1);
-        if (scanf("%d", &current_nilai) != 1 || current_nilai < 0 || current_nilai > 100) {
-            printf("Masukan nilai tidak valid. Nilai harus antara 0-100.\n");
-            return EXIT_FAILURE; // Keluar dengan status error
+    // Menggunakan array dinamis (atau cukup array statis jika N memiliki batasan maksimal yang diketahui).
+    // Untuk kasus tugas kuliah, array statis seringkali diperbolehkan jika N tidak terlalu besar.
+    // Namun, untuk fleksibilitas, kita bisa menggunakan VLA (Variable Length Array) yang didukung di C23
+    // atau alokasi dinamis dengan malloc jika N bisa sangat besar.
+    // Untuk kesederhanaan dan kepatuhan C23, VLA adalah pilihan yang bagus di sini.
+    int scores[n]; // Mendefinisikan array 'scores' untuk menyimpan 'n' nilai tugas.
+
+    // 2. Membaca 'n' baris nilai tugas mahasiswa.
+    // Setiap nilai harus berada antara 0-100.
+    for (i = 0; i < n; i++) {
+        if (scanf("%d", &scores[i]) != 1 || scores[i] < 0 || scores[i] > 100) {
+            fprintf(stderr, "Masukan nilai tugas tidak valid pada baris ke-%d. Nilai harus antara 0-100.\n", i + 1);
+            return 1; // Keluar dengan kode error
         }
-        nilai_mahasiswa[i] = current_nilai;
-        
-        // --- Perhitungan Sum, Min, Max saat input ---
-        sum += nilai_mahasiswa[i];
-        if (nilai_mahasiswa[i] < min_val) {
-            min_val = nilai_mahasiswa[i];
-        }
-        if (nilai_mahasiswa[i] > max_val) {
-            max_val = nilai_mahasiswa[i];
-        }
+        sum += scores[i]; // Menambahkan setiap nilai ke 'sum'.
     }
 
-    // --- Perhitungan Rata-rata ---
-    if (n > 0) { // Menghindari pembagian dengan nol
-        rata_rata = (double)sum / n;
+    // 3. Menghitung rata-rata dari seluruh nilai.
+    // Pastikan pembagian menggunakan double untuk mendapatkan hasil desimal yang akurat.
+    if (n > 0) {
+        average = (double)sum / n;
     } else {
-        rata_rata = 0.0; // Jika n=0, rata-rata adalah 0
+        average = 0.0; // Jika n adalah 0 (meskipun sudah divalidasi tidak <=0), rata-rata adalah 0.
     }
 
-    // --- Perhitungan Banyaknya Mahasiswa yang Nilainya >= Rata-rata ---
-    for (int i = 0; i < n; i++) {
-        if (nilai_mahasiswa[i] >= rata_rata) {
-            count_diatas_rata++;
+    // 4. Menghitung banyaknya mahasiswa yang nilainya di atas atau sama dengan rata-rata.
+    for (i = 0; i < n; i++) {
+        if (scores[i] >= average) {
+            count_above_average++; // Menambah hitungan jika kondisi terpenuhi.
         }
     }
 
-    // --- Output Hasil ---
-    printf("\n--- Output Program ---\n");
-    printf("%ld\n", sum); // Jumlah seluruh nilai
-    printf("%.2f\n", rata_rata); // Rata-rata dengan 2 digit presisi
-    printf("%d\n", count_diatas_rata); // Banyaknya mahasiswa >= rata-rata
-    printf("%d\n", max_val - min_val); // Rentang nilai (maks - min)
+    // 5. Menampilkan hasil sesuai format keluaran yang diminta.
+    // Baris pertama: Jumlah seluruh nilai.
+    printf("%d\n", sum);
+    // Baris kedua: Nilai rata-rata dengan 2 digit presisi di belakang koma.
+    printf("%.2f\n", average);
+    // Baris ketiga: Banyaknya mahasiswa yang nilainya di atas atau sama dengan rata-rata.
+    printf("%d\n", count_above_average);
 
-    return EXIT_SUCCESS; // Program berakhir sukses
+    return 0; // Mengembalikan 0 menandakan program berakhir dengan sukses.
 }
